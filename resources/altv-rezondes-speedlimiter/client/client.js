@@ -2,6 +2,12 @@ import * as alt from 'alt';
 import * as native from "natives";
 import * as nativeHelpText from './nativeTextHelper.js';
 
+const editableScriptConstants = {
+    higherSpeedKey: 39, // Right Arrow
+    lowerSpeedKey: 37, // Left Arrow
+    startKey: 89, // Key Y
+}
+
 const scriptConstants = {
     changeValue: 10,
     startValue: 80,
@@ -24,12 +30,6 @@ const scriptConstants = {
         b: 47
     },
 };
-
-const editableScriptConstants = {
-    higherSpeedKey: 39, // Right Arrow
-    lowerSpeedKey: 37, // Left Arrow
-    startKey: 89, // Key Y
-}
 
 let playerSeat = null;
 let playerVehicle = null;
