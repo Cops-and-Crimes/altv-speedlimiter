@@ -50,5 +50,5 @@ const editableScriptConstants = {
 
 ## Video 
 Der im Video gezeigte Speedometer ist von [MyHwu9508](https://github.com/MyHwu9508) - [altv-os-speedometer-collection](https://github.com/MyHwu9508/altv-os-speedometer-collection). <br>
-
+[Klick](https://www.youtube.com/watch?v=8jLysZcdmVg) auf das Bild um zum Video zu gelangen. <br>
 [<img src="https://i.imgur.com/x85ajxX.jpeg" width="50%">](https://www.youtube.com/watch?v=8jLysZcdmVg)
