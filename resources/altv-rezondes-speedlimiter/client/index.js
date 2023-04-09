@@ -1,5 +1,6 @@
 import * as alt from 'alt';
 import * as native from "natives";
+import * as nativeHelpText from './nativeHelpText.js';
 
 const scriptConstants = {
     changeValue: 10,
@@ -7,7 +8,28 @@ const scriptConstants = {
     maxSpeed: 200,
     changeValueIngame: 2.7777777777777777777777777777778,
     startValueIngame: 22.2222222222222222222222222222222,
+    stopColor: {
+        r: 118,
+        g: 52,
+        b: 52
+    }, 
+    doneColor: {
+        r: 0,
+        g: 161,
+        b: 27
+    },
+    workingColor: {
+        r: 220,
+        g: 224,
+        b: 47
+    },
 };
+
+const speedLimiterStatusEnum = {
+    Stop,
+    Working,
+    Done
+}
 
 const editableScriptConstants = {
     higherSpeedKey: 39, // Right Arrow
@@ -21,15 +43,21 @@ let isInVehicle = false;
 let currentMaxVehicleSpeed = scriptConstants.startValueIngame;
 let maxVehicleSpeed = scriptConstants.startValue;
 let speedLimiter = false;
-let isTempolimiterWorking = false;
+let isSpeedlimiterWorking = false;
+let currentColor = scriptConstants.stopColor;
+
+alt.everyTick(() =>{
+    if (!isInVehicle) return;
+
+    nativeHelpText.Draw2DText(maxVehicleSpeed, 0.45, 0.05, 0.75, currentColor.r, currentColor.g, currentColor.b);
+})
 
 alt.on('enteredVehicle', (vehicle, seat) => {
     playerSeat = seat;
     playerVehicle = vehicle;
     isInVehicle = true;
     
-    // hudBrowser.emit("CEF:HUD:SetPlayerHUDTempomatInfos", maxVehicleSpeed, "A");
-    console.log(maxVehicleSpeed + " Ausgeschaltet");
+    currentColor = scriptConstants.stopColor;
 });
 
 alt.on('changedVehicleSeat', (vehicle, oldSeat, seat) => {
@@ -46,7 +74,7 @@ alt.on('leftVehicle', (vehicle, seat) => {
     currentMaxVehicleSpeed = scriptConstants.startValueIngame;
     maxVehicleSpeed = scriptConstants.startValue;
     speedLimiter = false;
-    isTempolimiterWorking = false;
+    isSpeedlimiterWorking = false;
 });
 
 alt.on('keydown', (key) => {
@@ -72,9 +100,6 @@ function SetCruiseControlHigher(){
     currentMaxVehicleSpeed += scriptConstants.changeValueIngame;
     maxVehicleSpeed += scriptConstants.changeValue;
 
-    // hudBrowser.emit("CEF:SetPlayerHUDTempomatInfos", maxVehicleSpeed, "N");
-    console.log(maxVehicleSpeed + " Nichts (only update)");
-
     if (!speedLimiter) return;
 
     native.setVehicleMaxSpeed(playerVehicle.scriptID, currentMaxVehicleSpeed);
@@ -87,9 +112,6 @@ function SetCruiseControlLower(){
     currentMaxVehicleSpeed -= scriptConstants.changeValueIngame;
     maxVehicleSpeed -= scriptConstants.changeValue;
 
-    // hudBrowser.emit("CEF:SetPlayerHUDTempomatInfos", maxVehicleSpeed, "N");
-    console.log(maxVehicleSpeed + " Nichts (only update)");
-
     if (!speedLimiter) return;
     
     speedLimiter = false;
@@ -97,7 +119,7 @@ function SetCruiseControlLower(){
 }
 
 function StartCruiseControl(){
-    if(isTempolimiterWorking){
+    if(isSpeedlimiterWorking){
         speedLimiter = true;
         return;
     }
@@ -110,10 +132,9 @@ function SyncCruiseControl() {
     if (!speedLimiter) {
         let currentSpeed = native.getEntitySpeed(playerVehicle.scriptID);
         if (currentSpeed >= currentMaxVehicleSpeed) {
-            isTempolimiterWorking = true;
+            isSpeedlimiterWorking = true;
 
-            // hudBrowser.emit("CEF:SetPlayerHUDTempomatInfos", maxVehicleSpeed, "D");
-            console.log(maxVehicleSpeed + " Drosselvorgang...");
+            currentColor = scriptConstants.workingColor;
 
             alt.setTimeout(() => {
                 native.setVehicleMaxSpeed(playerVehicle.scriptID, currentSpeed - 1);
@@ -121,21 +142,19 @@ function SyncCruiseControl() {
             }, 100)
             return;
         }
-        isTempolimiterWorking = false;
+        isSpeedlimiterWorking = false;
         speedLimiter = true;
 
-        // hudBrowser.emit("CEF:SetPlayerHUDTempomatInfos", maxVehicleSpeed, "E");
-        console.log(maxVehicleSpeed + " Eingeschaltet");
+        currentColor = scriptConstants.doneColor;
 
         native.setVehicleMaxSpeed(playerVehicle.scriptID, currentMaxVehicleSpeed);
         return;
     }
 
-    isTempolimiterWorking = false;
+    isSpeedlimiterWorking = false;
     speedLimiter = false;
 
-    // hudBrowser.emit("CEF:SetPlayerHUDTempomatInfos", maxVehicleSpeed, "A");
-    console.log(maxVehicleSpeed + " Ausgeschaltet");
+    currentColor = scriptConstants.stopColor;
 
     native.setVehicleMaxSpeed(playerVehicle.scriptID, 0);
 }
